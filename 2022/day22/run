@@ -1,0 +1,6 @@
+#!/bin/bash
+
+./solution.py
+
+./solution.py puzzle.txt
+#pypy solution.py puzzle.txt

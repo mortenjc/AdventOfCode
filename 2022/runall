@@ -1,0 +1,13 @@
+#!/bin/bash
+
+for i in $(find . -name "day*" | sort)
+do
+  echo "============================="
+  echo Running solutions for $i
+  echo "============================="
+  pushd $i &>/dev/null
+  ./run
+  popd &>/dev/null
+  echo
+  echo
+done

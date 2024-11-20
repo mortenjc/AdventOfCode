@@ -1,0 +1,5 @@
+#!/bin/bash
+
+./solution.py
+
+./solution.py -f puzzle.txt

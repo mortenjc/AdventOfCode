@@ -1,0 +1,6 @@
+#!/bin/bash
+
+awk -f aoc1a.awk < puzzle1.txt
+
+gawk -f aoc1b.awk < test.txt
+gawk -f aoc1b.awk < puzzle1.txt

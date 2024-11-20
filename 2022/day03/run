@@ -1,0 +1,5 @@
+#!/bin/bash
+
+./aoc03a.py
+
+./aoc03a.py -f puzzle3.txt
