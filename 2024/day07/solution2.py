@@ -23,37 +23,31 @@ def solve(res, lst):
     a = lst[0]
     b = lst[1]
     rest = lst[2:]
-    return solve(res, [a+b] + rest) or solve(res, [a*b] + rest)
 
-
-def solve2(res, lst):
-    if len(lst) == 1:
-        return res == lst[0]
-
-    a = lst[0]
-    b = lst[1]
-    rest = lst[2:]
-    #print('x',a,b, int(str(a)+str(b)))
-    return solve2(res, [a+b] + rest) or solve2(res, [a*b] + rest) or \
-        solve2(res, [int(str(a)+str(b))] + rest)
+    if part == 1:
+        return solve(res, [a+b] + rest) or solve(res, [a*b] + rest)
+    elif part == 2:
+        return solve(res, [a+b] + rest) or solve(res, [a*b] + rest) or \
+            solve(res, [int(str(a)+str(b))] + rest)
+    else:
+        assert False
 
 
 with open(infile) as fin:
     lines = ((fin.read().strip()).split('\n'))
 
 
-for line in lines:
-    val, nums = line.split(':')
-    val = int(val)
+for part in [1,2]:
+    for line in lines:
+        val, nums = line.split(':')
+        val = int(val)
+        nums = list(map(int, nums.split()))
 
-    nums = list(map(int, nums.split()))
-    #print(val, nums)
-
-    if solve(val, nums):
-        S1 += val
-    if solve2(val, nums):
-        S2 += val
-
+        if solve(val, nums):
+            if part == 1:
+                S1 += val
+            else:
+                S2 += val
 
 print("------------- A -------------")
 print('S1 ', S1)
