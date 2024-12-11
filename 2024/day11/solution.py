@@ -21,7 +21,6 @@ for line in lines:
     L = defaultdict(int)
     for s in lst:
         L[s] += 1
-    print(L)
 
     D = {'0':['1']}
     for i in range(75):
@@ -40,11 +39,9 @@ for line in lines:
 
         L = NL
         if i == 24:
-            for l in L:
-                S1 += L[l]
+            S1 = sum([L[l] for l in L])
 
-for l in L:
-    S2 += L[l]
+S2 = sum([L[l] for l in L])
 
 print("------------- A -------------")
 print('S1 ', S1)
