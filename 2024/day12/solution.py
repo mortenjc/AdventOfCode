@@ -3,7 +3,9 @@
 from collections import deque
 from collections import defaultdict
 import sys
-
+import numpy as np
+import matplotlib.pyplot as plt
+import random
 
 infile = sys.argv[1] if len(sys.argv) > 1 else 'test.txt'
 print("<<{}>>".format(infile))
@@ -18,6 +20,22 @@ with open(infile) as fin:
 G = [[l for l in x] for x in lines]
 R = len(G)
 C = len(G[0])
+
+
+# Creating a black image using a NumPy array
+image_height = R
+image_width = C
+my_image = np.zeros((image_height, image_width, 3), dtype=np.uint8)
+
+# For plotting
+def colourregion(image, region):
+    cr = random.randint(50, 255)
+    cg = random.randint(0, 155)
+    cb = random.randint(50, 255)
+    for r, c in region:
+        image[r, c, 0] = cr  # Set red
+        image[r, c, 1] = cg    # Set green
+        image[r, c, 2] = cb    # Set blue
 
 
 def region(G, sr, sc):
@@ -43,7 +61,7 @@ def region(G, sr, sc):
 
 
 def neighb(area, r, c):
-    print(area, r, c)
+    #print(area, r, c)
     p = 0
     for dr, dc in [(1,0), (-1,0), (0,1), (0,-1)]:
         rr = r + dr
@@ -81,6 +99,7 @@ for r in range(R):
             continue
         a = region(G, r, c)
         res.append(a)
+        colourregion(my_image, a)
         for x in a:
             seen.add(x)
 
@@ -89,6 +108,11 @@ for i, a in enumerate(res):
     S1 += len(a)*perim(a)
 
 walk(res[0])
+
+#Show the black image using matplotlib
+plt.imshow(my_image)
+plt.axis('off')  # It helps when Turn off axes to remove the axis ticks and labels
+plt.show()
 
 print("------------- A -------------")
 print('S1 ', S1)
