@@ -7,8 +7,6 @@ import re
 import math
 
 
-mv = {'^':(-1,0), 'v':(1,0), '>':(0,1), '<':(0,-1)}
-
 DIRS4 = [(1,0), (-1,0), (0,1), (0,-1)]
 DIRS8 = [(1,0), (-1,0), (0,1), (0,-1), (1,1), (-1,-1), (-1,1), (1,-1)]
 
@@ -23,6 +21,7 @@ if infile == 'puzzle.txt':
 else:
     pass
 
+
 with open(infile) as fin:
     map, moves = ((fin.read().strip()).split('\n\n'))
 
@@ -30,47 +29,49 @@ G = [[x for x in l] for l in map.split('\n')]
 R = len(G)
 C = len(G[0])
 
+moves = ''.join(moves.split('\n'))
+
+mv = {'^':(-1,0), 'v':(1,0), '>':(0,1), '<':(0,-1)}
+
+# Helper function - print grid
+def printg(X, rpos, cpos):
+    for r in range(len(X)):
+        l = ''
+        for c in range(len(X[0])):
+            if r == rpos and c == cpos:
+                l += '@'
+            else:
+                l += X[r][c]
+        print(l)
+    print()
 
 
-def moveupdown(G2, r, c, dr):
+# Move up or down
+def moveud(G2, r, c, dr):
+    dir = {'[':1, ']':-1}
     ccom = set()
-    Q = [(r,c)]
+    Q = []
+
+    ch = G2[r][c]
+    assert ch in '[]'
+
+    Q.extend([(r, c), (r, c + dir[ch])])
     ccom.add((r, c))
-    if G2[r][c] == '[':
-        Q.append((r, c+1))
-        ccom.add((r, c+1))
-    elif G2[r][c] == ']':
-        Q.append((r, c-1))
-        ccom.add((r, c-1))
-    else:
-        assert False
-    print(ccom)
-    while len(Q):
+    ccom.add((r, c + dir[ch]))
+
+    while len(Q): # find connected
         rr, cc = Q.pop(0)
         nr = rr + dr
-        print(f'rr, cc ({rr},{cc}), nr, nc ({nr},{cc}) ch {G2[nr][cc]}')
-        if G2[nr][cc] == "[":
-            print('[ at', nr, cc, 'add', nr, cc+1)
-            Q.append((nr,cc))
-            Q.append((nr,cc+1))
-            ccom.add((nr,cc))
-            ccom.add((nr,cc+1))
-        elif G2[nr][cc] == "]":
-            print('] at', nr, cc, 'add', nr, cc -1)
-            Q.append((nr,cc))
-            Q.append((nr,cc-1))
-            ccom.add((nr,cc))
-            ccom.add((nr,cc-1))
-        else:
-            pass
-    print('connected', ccom)
-    canmove = True
-    for mr,mc in ccom:
-        if G2[mr+dr][mc] == '#':
-            canmove = False
-    if not canmove:
-        return False
+        ch = G2[nr][cc]
+        if not ch in "[]":
+            continue
 
+        Q.extend([(nr,cc), (nr,cc + dir[ch])])
+        ccom.add((nr,cc))
+        ccom.add((nr,cc + dir[ch]))
+
+    if any([G2[mr+dr][mc] == '#' for mr, mc in ccom]):
+        return False
 
     mccom = set()
     for mr,mc in ccom:
@@ -78,30 +79,26 @@ def moveupdown(G2, r, c, dr):
         G2[mr][mc] = '.'
     for mr, mc, ch in mccom:
         G2[mr][mc] = ch
-    print(mccom)
-
     return True
 
 
 
-def movebox(G, r, c, dc):
+def movelr(G, r, c, dc):
     assert G[r][c] in "[]"
     rr = r
     cc = c + dc
     dist = 0
-    space = 0
+    canmove = False
     while G[rr][cc] != '#':
-        print(rr,cc)
         dist += 1
         if G[rr][cc] == '.':
-            print('found space at', rr, cc)
-            space = 1
+            canmove = True
             break
         cc += dc
-    if not space:
+    if not canmove:
         return False
-    assert G[rr][cc] == '.'
-    for i in range(dist):
+
+    for _ in range(dist):
         pc = cc - dc
         G[rr][cc] = G[rr][pc]
         cc = pc
@@ -109,85 +106,63 @@ def movebox(G, r, c, dc):
     return True
 
 
-def printg(G, rr, cc):
-    for r in range(R2):
-        l = ''
-        for c in range(C2):
-            if r == rr and c == cc:
-                l += '@'
-            else:
-                l += G[r][c]
-        print(l)
-    print()
 
-
+# Construct G2 from G, find start (@)
 G2 = []
 for r in range(R):
     tmp = []
     for c in range(C):
         ch = G[r][c]
         if ch == 'O':
-            tmp.append('[')
-            tmp.append(']')
+            tmp.extend(['[', ']'])
         elif ch == '@':
-            tmp.append('@')
-            tmp.append('.')
+            rr = r
+            cc = len(tmp)
+            tmp.extend(['.', '.'])
         else:
-            tmp.append(ch)
-            tmp.append(ch)
+            tmp.extend([ch, ch])
     G2.append(tmp)
+
 R2 = len(G2)
 C2 = len(G2[0])
 assert R == R2 and C2 == C * 2
 
 
-moves = ''.join(moves.split('\n'))
-
-rr = 0
-cc = 0
-for r in range(R2):
-    for c in range(C2):
-        if G2[r][c] == '@':
-            rr = r
-            cc = c
-            G2[r][c] = '.'
-
-printg(G2, rr, cc)
 
 for i, move in enumerate(moves):
-    print(i, move)
     assert move in "<>^v"
     (dr, dc) = mv[move]
     nr = rr + dr
     nc = cc + dc
-    if G2[nr][nc] == '#':
-        pass # don't move
-    elif G2[nr][nc] == '.':
+    ch = G2[nr][nc]
+    assert ch in '#.[]'
+    moved = False
+    if  ch == '#':
+        continue # don't move
+    elif ch == '.':
+        moved = True
+    elif dc != 0 and dr == 0: # left right
+        moved = movelr(G2, nr, nc, dc)
+    elif dc == 0 and dr != 0: # up down
+        moved = moveud(G2, nr, nc, dr)
+    if moved:
         rr = nr
         cc = nc
-    elif G2[nr][nc] in '[]' and dc != 0 and dr == 0: # left right
-        print('move box - left right')
-        moved = movebox(G2, nr, nc, dc)
-        if moved:
-            rr = nr
-            cc = nc
-    elif G2[nr][nc] in '[]' and dc == 0 and dr != 0:
-        print(f'move box(es) - up down (start ({nr},{nc}))')
-        moved = moveupdown(G2, nr, nc, dr)
-        if moved:
-            rr = nr
-            cc = nc
-    printg(G2, rr, cc)
 
-for r in range(R2):
-    for c in range(C2):
-        if G2[r][c] == '[':
-            S2 += 100 *r + c
 
-# for r in range(R):
-#     for c in range(C):
-#         if G[r][c] == 'O':
-#             S1 += r*100 +c
+def score(X, ch):
+    nr = len(X)
+    nc = len(X[0])
+    res = 0
+    for r in range(nr):
+        for c in range(nc):
+            if X[r][c] == ch:
+                res += 100 *r + c
+    return res
+
+printg(G2, rr, cc)
+
+S2 = score(G2, '[')
 
 print("------------- A -------------")
 print('S1 ', S1)
