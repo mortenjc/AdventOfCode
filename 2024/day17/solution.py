@@ -23,13 +23,13 @@ else:
 with open(infile) as fin:
     init, prg = ((fin.read().strip()).split('\n\n'))
 
-regs = {}
+regs = []
 
 for reg in init.split('\n'):
     reg = reg.split(':')
     var = reg[0][-1]
     val = int(reg[1])
-    regs[var] = val
+    regs.append(val)
 
 pg = prg.split(':')[1].split(',')
 pg = list(map(int, pg))
@@ -40,7 +40,6 @@ OP = {0:'adv', 1:'bxl', 2:'bst', 3:'jnz', 4:'bxc', 5:'out', 6:'bdv', 7:'cdv'}
 
 matches = 0
 def run(pg, regs, part2):
-    n = regs['A']
     global matches
     pc = 0
     output = []
@@ -52,22 +51,22 @@ def run(pg, regs, part2):
             cval = opr
             reg = 'I'
         elif opr <=6:
-            reg = chr(ord('A') + (opr - 4))
+            reg = opr - 4
             cval = regs[reg]
         else:
             cval = -1
 
         if opc == 0: # adv
-            regs['A'] = regs['A']//2**cval
+            regs[0] = regs[0]//2**cval
         elif opc == 1: # bxl
-            regs['B'] = regs['B'] ^ opr
+            regs[1] = regs[1] ^ opr
         elif opc == 2: # bst
-            regs['B'] = cval % 8
+            regs[1] = cval % 8
         elif opc == 3: # jnz
-            if regs['A'] != 0:
+            if regs[0] != 0:
                 pc = opr - 2
         elif opc == 4: # bxc
-            regs['B'] = regs['B'] ^ regs['C']
+            regs[1] = regs[1] ^ regs[2]
         elif opc == 5: # out
             if part2:
                 if cval%8 != pg[len(output)]: # mismatch
@@ -79,9 +78,9 @@ def run(pg, regs, part2):
             output.append(cval%8)
 
         elif opc == 6: # bdv
-            regs['B'] = regs['A']//(2**cval)
+            regs[1] = regs[0]//(2**cval)
         elif opc == 7: # cdv
-            regs['C'] = regs['A']//(2**cval)
+            regs[2] = regs[0]//(2**cval)
         else:
             assert False
         pc += 2
@@ -90,12 +89,11 @@ def run(pg, regs, part2):
 
     return output, False
 
-
-
+#
+#
 
 tregs = regs.copy()
 res, newbest = run(pg, tregs, part2=False)
-
 S1 = ','.join([str(x) for x in res])
 
 
@@ -105,7 +103,7 @@ pow = 0
 while True:
     tregs = regs.copy()
     ast = i * 8**pow + cst
-    tregs['A'] = ast
+    tregs[0] = ast
 
     res, newbest = run(pg, tregs, part2=True)
     if newbest and matches > 3:
