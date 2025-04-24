@@ -1,0 +1,53 @@
+digraph {
+	node [color=black fontcolor=white fontsize=4 margin=0 shape=circle style=filled width=0.1]
+	edge [color=grey penwidth=0.75]
+	node [fontsize=10]
+	kh
+	qp
+	de
+	ka
+	yn
+	cg
+	vc
+	tb
+	wh
+	ta
+	tc
+	td
+	aq
+	wq
+	ub
+	co
+	kh -> tc [rank=0]
+	kh -> qp [rank=0]
+	kh -> ub [rank=0]
+	kh -> ta [rank=0]
+	qp -> ub [rank=1]
+	qp -> td [rank=1]
+	qp -> wh [rank=1]
+	de -> cg [rank=2]
+	de -> co [rank=2]
+	de -> ta [rank=2]
+	de -> ka [rank=2]
+	ka -> co [rank=3]
+	ka -> tb [rank=3]
+	ka -> ta [rank=3]
+	yn -> aq [rank=4]
+	yn -> cg [rank=4]
+	yn -> wh [rank=4]
+	yn -> td [rank=4]
+	cg -> tb [rank=5]
+	cg -> aq [rank=5]
+	vc -> aq [rank=6]
+	vc -> ub [rank=6]
+	vc -> wq [rank=6]
+	vc -> tb [rank=6]
+	tb -> wq [rank=7]
+	wh -> tc [rank=8]
+	wh -> td [rank=8]
+	ta -> co [rank=9]
+	tc -> td [rank=10]
+	tc -> co [rank=10]
+	aq -> wq [rank=12]
+	wq -> ub [rank=13]
+}
