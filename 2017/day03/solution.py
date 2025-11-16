@@ -1,5 +1,7 @@
 #!/usr/local/bin/python3
 
+from collections import defaultdict
+
 import sys
 import math as m
 
@@ -10,54 +12,62 @@ print("<<{}>>".format(infile))
 S1 = 0
 S2 = 0
 
-def ranges(r):
-    if r == 1:
-        return 1, 1, 1, 1, 1
-    end = r ** 2
-    start = end - 2*r - 2*(r-2) + 1
-
-    mind = (r-1)//2
-    maxd = r -1
-    return r, start, end, mind, maxd
-
-
-for r in range(1, 10, 2):
-    print(ranges(r))
-
-
-
 n = 289326
 
-def getR(n):
-    r = 1
-    while True:
-        r, st, ed, mi, ma = ranges(r)
+vals = defaultdict(int)    # value for a (x,y) coordinate
+vals2 = defaultdict(int)
+coords = defaultdict(dict) # coordinate for number n
 
-        if st <= n <= ed:
-            print(f'found R {r}')
-            return r, st, ed, mi, ma
-        r += 2
+coords[1] = (0,0)
+vals[(0,0)] = 1
+vals2[(0,0)] = 1
 
-r, st, ed, mi, ma = getR(n)
-print(r, st, ed, mi, ma)
+x = 0
+y = 0
+nn = 1
+dc =  [(1,0), (0,1), (-1,0), (0,-1)]
+dc2 = [(1,0), (0,1), (-1,0), (0,-1), (1,1), (1, -1), (-1, 1), (-1, -1)]
+dir = 0
 
-cur = ed
-d = ma
-dec = True
+
+def sumnghbr(x,y):
+    if (x,y) == (0,0):
+        return 1
+    return sum([ vals2[ (x + d[0], y + d[1]) ] for d in dc2])
+
+
+# turn if there are no neighbors to either side
+def getdir(x, y, dir):
+    sum = 0
+    for dx, dy in [dc[(dir + 1)%4], dc[(dir - 1)%4]]:
+        sum += vals[(x+dx, y+dy)]
+    if sum == 0:
+        return (dir + 1)%4
+    return dir
+
+
 while True:
-    if n == cur:
-        print(n, d)
-        S1 = d
+    if S2 == 0:
+        tmp = sumnghbr(x,y)
+        vals2[(x,y)] = tmp
+        if tmp > n:
+            S2 = tmp
+
+    if nn == n:
+        S1 = abs(x)+abs(y)
         break
-    cur -= 1
-    if dec:
-        d -= 1
-        if d == mi:
-            dec = False
-    else:
-        d += 1
-        if d == ma:
-            dec = True
+
+    dx, dy = dc[dir]
+    x += dx
+    y += dy
+    newpos = (x, y)
+    nn += 1
+    vals[newpos] = nn
+
+    coords[nn] = newpos
+    newdir = getdir(x,y, dir)
+    dir = newdir
+
 
 
 print("------------- A -------------")
