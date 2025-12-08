@@ -19,76 +19,56 @@ else:
 S1 = 0
 S2 = 0
 
-def d2(a, b):
-    return (a[0]-b[0])**2 + (a[1]-b[1])**2 + (a[2]-b[2])**2
-
 with open(infile) as fin:
     lines = ((fin.read().strip()).split('\n'))
 
-poss = []
-D = defaultdict(list)
+P = []
 for line in lines:
-    #print(line)
-    x,y,z = line.split(',')
-    x = int(x)
-    y = int(y)
-    z = int(z)
-    poss.append([x,y,z])
+    x,y,z = map(int, line.split(','))
+    P.append([x,y,z])
 
 
-parent = [x for x in range(len(poss))]
+parent = [x for x in range(len(P))]
 
 def find(i):
     if parent[i] != i:
         parent[i] = find(parent[i])
     return parent[i]
 
-def UUnion(i, j):
-    irep = find(i)
-    jrep = find(j)
-    parent[irep] = jrep
+def union(i, j):
+    parent[find(i)] = find(j)
 
-
-for a in range(len(poss)):
-    for b in range(a, len(poss)):
+D = defaultdict(list)
+for a in range(len(P)):
+    for b in range(a+1, len(P)):
         if a != b:
-            l = d2(poss[a],poss[b])
-            D[l].append([a, b])
-            assert len(D[l][0]) == 2
+            A, B = P[a], P[b]
+            l = (A[0]-B[0])**2 + (A[1]-B[1])**2 + (A[2]-B[2])**2
+            D[l]=([a, b])
 
 ln = [int(x) for x in D]
-cnt = 0
-for i in sorted(ln):
+ln = sorted(ln)
+
+conns = 0
+for cnt, i in enumerate(ln):
     if cnt == stop:
-        print('***** S1 condition *****')
         DD = defaultdict(int)
         for xx in range(len(parent)):
-            root = find(xx)
-            DD[root] += 1
+            DD[find(xx)] += 1
+        S1 = math.prod(sorted(DD.values())[-3:])
 
-        res = math.prod(sorted(DD.values())[-3:])
+    a, b = D[i]
+    if find(a) != find(b):
+        conns += 1
+        union(a,b)
 
-        S1 = res
-    cnt += 1
-
-    a, b = D[i][0]
-
-    UUnion(a,b)
-
-
-    if cnt > stop:
-        aa = [find(x) for x in range(len(poss))]
+    if conns == len(P) - 1:
+        aa = [find(x) for x in range(len(P))]
         if all(x == aa[0] for x in aa):
-            print('***** S2 condition *****')
-            print(cnt, a,b, poss[a], poss[b])
-            S2 = poss[a][0]*poss[b][0]
+            S2 = P[a][0]*P[b][0]
 
     if S1 != 0 and S2 != 0:
         break
-
-
-
-
 
 print("------------- A -------------")
 print('S1 ', S1)
