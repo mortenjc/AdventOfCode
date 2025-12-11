@@ -2,7 +2,7 @@
 
 import numpy as np
 import sys
-import portion as p
+#import portion as p
 from collections import defaultdict
 from functools import cache
 import math
@@ -32,23 +32,9 @@ for line in lines:
 print(FS)
 print(BTN)
 
-def val(pat):
-    res = 0
-    for i, ch in enumerate(pat):
-        if ch == '#':
-            res += (1 << (len(pat)-i - 1) )
-    return res
-
-assert val('....') == 0
-assert val('...#') == 1
-assert val('#..#') == 9
-assert val('####') == 15
-
 for i in range(len(lines)):
-    end = val(FS[i])
-    print(end)
-
-    for j in range()# FS[i]
+    for a in range(2**len(BTN[i])):
+        print(i, a)
 
 print("------------- A -------------")
 print('S1 ', S1)
